@@ -1,7 +1,8 @@
-faiss-cpu==1.9.0.post1
-langchain==0.3.10 
-langchain_community==0.3.10 
-langchain_openai==0.2.11 
-openai==1.57.0 
-streamlit==1.41.1
-unstructured==0.16.11
+faiss-cpu==1.11.0
+langchain==0.3.25
+langchain_community==0.3.24
+langchain_openai==0.3.21
+openai==1.84
+streamlit==1.45.1
+unstructured==0.17.2
+unstructured[pdf]
