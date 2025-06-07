@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "streamlit-vector-search"
+version = "0.1.0"
+description = "langchain based vector search using remote database"
+authors = ["toweringcloud <toweringcloud@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+black = "^24.8.0"
+faiss-cpu = "1.9.0.post1"
+langchain = "0.3.25"
+langchain_community = "0.3.24" 
+langchain_openai = "0.3.21"
+langchain_unstructured = "0.1.5"
+openai = "1.84.0"
+streamlit = "1.45.1"
+unstructured-client = "0.25.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
