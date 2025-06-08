@@ -9,7 +9,7 @@ from langchain_community.document_loaders import UnstructuredFileLoader
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
-# from langchain_unstructured import UnstructuredLoader
+from langchain_unstructured import UnstructuredLoader
 from pathlib import Path
 
 
@@ -43,8 +43,9 @@ with st.sidebar:
 
     # Upload Document File
     file = st.file_uploader(
-        "Upload a txt, pdf or docx file",
-        type=["docx", "pdf", "txt"],
+        "Upload a text file",
+        # type=["docx", "pdf", "txt"],
+        type=["txt"],
     )
 
     # Link to Github Repo
@@ -92,8 +93,8 @@ def embed_file(file):
         chunk_size=600,
         chunk_overlap=100,
     )
-    loader = UnstructuredFileLoader(file_path)
-    # loader = UnstructuredLoader(file_path=[file_path])
+    # loader = UnstructuredFileLoader(file_path)
+    loader = UnstructuredLoader([file_path])
     # loader = UnstructuredLoader(
     #     file_path = [file_path],
     #     api_key=st.secrets.get("UNSTRUCTURED_API_KEY"),

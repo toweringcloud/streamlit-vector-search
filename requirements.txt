@@ -2,7 +2,7 @@ faiss-cpu==1.11.0
 langchain==0.3.25
 langchain_community==0.3.24
 langchain_openai==0.3.21
+langchain_unstructured==0.1.5
 openai==1.84
 streamlit==1.45.1
-unstructured==0.17.2
-unstructured[pdf]
+# unstructured==0.17.2
