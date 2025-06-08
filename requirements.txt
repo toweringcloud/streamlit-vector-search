@@ -5,4 +5,4 @@ langchain_openai==0.3.21
 langchain_unstructured==0.1.5
 openai==1.84
 streamlit==1.45.1
-# unstructured==0.17.2
+unstructured==0.17.2
