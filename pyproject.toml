@@ -15,6 +15,7 @@ langchain_openai = "0.3.21"
 langchain_unstructured = "0.1.5"
 openai = "1.84.0"
 streamlit = "1.45.1"
+unstructured = "0.17.2"
 unstructured-client = "0.25.9"
 
 [build-system]

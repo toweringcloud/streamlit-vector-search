@@ -5,7 +5,6 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.document_loaders import UnstructuredFileLoader
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
@@ -93,16 +92,20 @@ def embed_file(file):
         chunk_size=600,
         chunk_overlap=100,
     )
-    # loader = UnstructuredFileLoader(file_path)
-    loader = UnstructuredLoader([file_path])
-    # loader = UnstructuredLoader(
-    #     file_path = [file_path],
-    #     api_key=st.secrets.get("UNSTRUCTURED_API_KEY"),
-    #     partition_via_api=True,
-    #     chunking_strategy="by_title",
-    #     strategy="fast",
-    # )
+
+    loader = UnstructuredLoader(file_path=file_path)
+    # print(f"loader: {loader}")
+    # loader: <langchain_unstructured.document_loaders.UnstructuredLoader object at 0x000002DF8855BFE0>
+    # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+    # INFO: Loading faiss with AVX2 support.
+    # INFO: Successfully loaded faiss with AVX2 support.
+    # INFO: Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes. This is only an error if you're trying to use GPU Faiss.
+    # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+    # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
     docs = loader.load_and_split(text_splitter=splitter)
+    # print(f"docs: {docs}")
+    # docs: [Document(metadata={'source': './.files/test_ko.txt', 'last_modified': '2025-06-08T20:30:50', 'languages': ['kor'],
 
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
