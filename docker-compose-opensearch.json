@@ -1,0 +1,17 @@
+{
+    "name": "opensearch-node1",
+    "cluster_name": "opensearch-cluster",
+    "cluster_uuid": "3v2D3YMnQkqU5iLXINH49w",
+    "version": {
+        "distribution": "opensearch",
+        "number": "2.13.0",
+        "build_type": "tar",
+        "build_hash": "7ec678d1b7c87d6e779fdef94e33623e1f1e2647",
+        "build_date": "2024-03-26T00:02:39.659767978Z",
+        "build_snapshot": false,
+        "lucene_version": "9.10.0",
+        "minimum_wire_compatibility_version": "7.10.0",
+        "minimum_index_compatibility_version": "7.0.0"
+    },
+    "tagline": "The OpenSearch Project: https://opensearch.org/"
+}

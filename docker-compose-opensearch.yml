@@ -1,0 +1,36 @@
+services:
+  opensearch-node1:
+    image: opensearchproject/opensearch:2.13.0 # 원하는 OpenSearch 버전으로 변경 가능
+    container_name: opensearch-node1
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m # 메모리 설정, 필요에 따라 조정
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data # 데이터 영속성을 위한 볼륨
+    ports:
+      - "9200:9200" # OpenSearch API 포트
+      - "9600:9600" # OpenSearch Transport 포트 (노드 간 통신)
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.13.0 # OpenSearch 버전과 일치시키세요
+    container_name: opensearch-dashboards
+    ports:
+      - "5601:5601" # OpenSearch Dashboards 웹 UI 포트
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200"]' # OpenSearch 노드 연결
+      # OpenSearch Dashboards에서 자체 서명된 인증서를 사용하기 때문에 다음 설정이 필요합니다.
+      # 실제 프로덕션 환경에서는 유효한 인증서를 사용해야 합니다.
+      OPENSEARCH_SSL_VERIFY: "false" # HTTPS 사용 시 SSL 검증 비활성화 (개발용)
+    depends_on:
+      - opensearch-node1 # OpenSearch 노드가 먼저 실행되도록 설정
+
+volumes:
+  opensearch-data: # OpenSearch 데이터 볼륨 정의

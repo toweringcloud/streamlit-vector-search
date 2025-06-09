@@ -14,6 +14,15 @@ Python 3.12.8
 $ python -m pip install --upgrade pip
 $ pip --version
 pip 25.1.1 from /usr/lib/python3/dist-packages/pip
+
+$ docker -v
+Docker version 28.1.1, build 4eba377
+
+$ docker-compose -v
+Docker Compose version v2.35.1-desktop.1
+
+$ docker compose up -d -f docker-compose-opensearch.yml
+$ curl -k -u admin:admin https://localhost:9200
 ```
 
 ### config
