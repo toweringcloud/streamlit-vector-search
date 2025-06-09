@@ -18,8 +18,8 @@ from pathlib import Path
 
 
 st.set_page_config(
-    page_title="::: Vector Search Chatbot :::",
-    page_icon="📜",
+    page_title="::: Vector Search :::",
+    page_icon="😎",
 )
 st.title("Vector Search 😎")
 
@@ -27,11 +27,12 @@ st.markdown(
     """
         Use this chatbot to ask questions about your document.
 
-        1. Choose a vector storage.
-        2. Choose a favorite model.
-        3. Input your OpenAI API key.
-        4. Upload a text document file.
-        5. Ask questions about your document.
+        1. Choose a vector storage for search.
+        2. Choose a large language model.
+        3. Choose a specific version.
+        4. Input your custom API key.
+        5. Upload a text document file.
+        6. Ask questions about your document.
     """
 )
 st.divider()
@@ -39,18 +40,30 @@ st.divider()
 with st.sidebar:
     # Vector Storage
     selected_storage = st.selectbox(
-        "Choose a vector storage",
+        "Choose a vector storage for search",
         ("LocalFileStore", "OpenSearch", "Elasticsearch"),
     )
 
-    # GPT Model
+    # AI Model
     selected_model = st.selectbox(
-        "Choose a favorite Model",
-        ("gpt-4.1-nano", "gpt-4o-mini"),
+        "Choose a large language model",
+        ("OpenAI"),
+    )
+
+    # GPT Version
+    selected_version = st.selectbox(
+        "Choose a specific version",
+        (
+            ("gpt-4.1-nano", "gpt-4o-mini")
+            if selected_model == "OpenAI"
+            else ("gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.5-flash")
+        ),
     )
 
     # LLM API Key
-    openai_api_key = st.text_input("Input your OpenAI API key", type="password")
+    custom_api_key = st.text_input(
+        f"Input your {selected_model} API key", type="password"
+    )
 
     # Document File
     file = st.file_uploader(
@@ -60,7 +73,6 @@ with st.sidebar:
     )
 
     # Link to Github Repo
-    st.markdown("---")
     github_link = (
         "https://github.com/toweringcloud/streamlit-vector-search/blob/main/index.py"
     )
@@ -83,14 +95,14 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 
 # Load Configuration
-if "OPENAI_API_KEY" in st.secrets:
-    OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+if "OPENSEARCH_HOST" in st.secrets:
     OPENSEARCH_HOST = st.secrets["OPENSEARCH_HOST"]
     OPENSEARCH_PORT = st.secrets["OPENSEARCH_PORT"]
     OPENSEARCH_USERNAME = st.secrets["OPENSEARCH_USERNAME"]
     OPENSEARCH_PASSWORD = st.secrets["OPENSEARCH_PASSWORD"]
     OPENSEARCH_INDEX_NAME = st.secrets["OPENSEARCH_INDEX_NAME"]
     OPENSEARCH_CACHE_INDEX_NAME = st.secrets["OPENSEARCH_CACHE_INDEX_NAME"]
+    ELASTICSEARCH_SCHEME = st.secrets["ELASTICSEARCH_SCHEME"]
     ELASTICSEARCH_HOST = st.secrets["ELASTICSEARCH_HOST"]
     ELASTICSEARCH_PORT = st.secrets["ELASTICSEARCH_PORT"]
     ELASTICSEARCH_USERNAME = st.secrets["ELASTICSEARCH_USERNAME"]
@@ -99,13 +111,13 @@ if "OPENAI_API_KEY" in st.secrets:
     ELASTICSEARCH_CACHE_INDEX_NAME = st.secrets["ELASTICSEARCH_CACHE_INDEX_NAME"]
 else:
     config = dotenv_values(".env")
-    OPENAI_API_KEY = config["OPENAI_API_KEY"]
     OPENSEARCH_HOST = config["OPENSEARCH_HOST"]
     OPENSEARCH_PORT = config["OPENSEARCH_PORT"]
     OPENSEARCH_USERNAME = config["OPENSEARCH_USERNAME"]
     OPENSEARCH_PASSWORD = config["OPENSEARCH_PASSWORD"]
     OPENSEARCH_INDEX_NAME = config["OPENSEARCH_INDEX_NAME"]
     OPENSEARCH_CACHE_INDEX_NAME = config["OPENSEARCH_CACHE_INDEX_NAME"]
+    ELASTICSEARCH_SCHEME = config["ELASTICSEARCH_SCHEME"]
     ELASTICSEARCH_HOST = config["ELASTICSEARCH_HOST"]
     ELASTICSEARCH_PORT = config["ELASTICSEARCH_PORT"]
     ELASTICSEARCH_USERNAME = config["ELASTICSEARCH_USERNAME"]
@@ -143,14 +155,15 @@ def get_opensearch_client():
 def get_elasticsearch_client():
     try:
         client = Elasticsearch(
-            hosts=[{"host": ELASTICSEARCH_HOST, "port": ELASTICSEARCH_PORT}],
-            http_auth=(ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD),
-            use_ssl=True,  # HTTPS 사용 시 True
-            verify_certs=False,  # 개발/테스트 시 False, 프로덕션에서는 True 및 인증서 설정 필요
-            ssl_assert_hostname=False,
-            ssl_show_warn=False,
+            hosts=[
+                {
+                    "scheme": ELASTICSEARCH_SCHEME,
+                    "host": ELASTICSEARCH_HOST,
+                    "port": ELASTICSEARCH_PORT,
+                }
+            ],
+            # http_auth=(ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD),
         )
-        # 클라이언트가 제대로 연결되었는지 확인
         client.info()
         return client
     except Exception as e:
@@ -179,11 +192,10 @@ def embed_file(file):
     docs = loader.load_and_split(text_splitter=splitter)
 
     # 3. 임베딩 모델 초기화
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    embeddings = OpenAIEmbeddings(openai_api_key=custom_api_key)
 
     # 4. 임베딩 캐시(ByteStore) 설정
-    # OpenSearch 자체를 Key-Value 스토어로 활용하는 커스텀 ByteStore를 구현하면 임베딩 캐시로 설정 가능
-    if selected_storage == "LocalFileStore" or selected_storage == "OpenSearch":
+    if selected_storage == "LocalFileStore":
         cache_path = "./.cache"
         embedding_path = f"{cache_path}/local"
         Path(embedding_path).mkdir(parents=True, exist_ok=True)
@@ -191,7 +203,18 @@ def embed_file(file):
         cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
             embeddings, embedding_cache_dir
         )
-    else:
+    elif selected_storage == "OpenSearch":
+        # 1) OpenSearch 자체를 Key-Value 스토어로 활용하는 커스텀 ByteStore 구현
+        # 2) Redis와 같은 Key-Value 스토어를 사용하여 임베딩 캐시를 저장
+        # 3) 로컬 파일 시스템을 사용하여 임베딩 캐시를 저장
+        cache_path = "./.cache"
+        embedding_path = f"{cache_path}/open"
+        Path(embedding_path).mkdir(parents=True, exist_ok=True)
+        embedding_cache_dir = LocalFileStore(embedding_path)
+        cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
+            embeddings, embedding_cache_dir
+        )
+    elif selected_storage == "Elasticsearch":
         client = get_elasticsearch_client()
         embedding_cache_store = ElasticsearchStore(
             client=client,  # Elasticsearch 클라이언트
@@ -201,6 +224,9 @@ def embed_file(file):
         cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
             embeddings, embedding_cache_store
         )
+    else:
+        st.error("Invalid storage option selected.")
+        st.stop()
 
     # 5. 벡터 저장소 설정
     if selected_storage == "LocalFileStore":
@@ -228,9 +254,6 @@ def embed_file(file):
             es_url=f"http://{ELASTICSEARCH_HOST}:{ELASTICSEARCH_PORT}",
             index_name=ELASTICSEARCH_INDEX_NAME,
         )
-    else:
-        st.error("Invalid storage option selected.")
-        st.stop()
 
     # 6. Retriever 생성
     retriever = vectorstore.as_retriever()
@@ -275,12 +298,12 @@ prompt = ChatPromptTemplate.from_messages(
 
 
 def main():
-    if not openai_api_key:
+    if not custom_api_key:
         return
 
     llm = ChatOpenAI(
-        openai_api_key=openai_api_key,
-        model=selected_model,
+        openai_api_key=custom_api_key,
+        model=selected_version,
         temperature=0.1,
         streaming=True,
         callbacks=[

@@ -23,6 +23,9 @@ Docker Compose version v2.35.1-desktop.1
 
 $ docker compose up -d -f docker-compose-opensearch.yml
 $ curl -k -u admin:admin https://localhost:9200
+
+$ docker compose up -d -f docker-compose-elasticsearch.yml
+$ curl -k https://localhost:19200
 ```
 
 ### config
@@ -49,13 +52,15 @@ $ exit
 
 ### launch
 
--   update application secrets in streamlit env
+-   update runtime secrets in streamlit env
 
 ```sh
 $ vi .streamlit/secrets.toml
 OPENSEARCH_HOST = "localhost"
 OPENSEARCH_PORT = 9200
 ...
+OPENSEARCH_INDEX_NAME = "streamlit_documents"
+OPENSEARCH_CACHE_INDEX_NAME = "embedding_cache"
 ```
 
 -   run streamlit app in root environment

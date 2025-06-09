@@ -1,88 +1,126 @@
-https://www.streamcreative.com/chatbot-scripts-examples-templates
+https://www.elastic.co/blog/how-to-make-a-chatbot
 
-Chatbot Scripts: A Step By Step Guide (With Examples & Templates)
-Chatbots aren’t going anywhere. In fact, if you haven’t had an encounter with a chatbot in your own online user experience, you’re in the minority.
+How to make a chatbot: Dos and don'ts for developers in an AI-driven world
+By Elastic Platform Team
+06 March 2024
 
-The use of chatbots as a brand communication channel has increased by 92% since 2019. (Drift)
-At least 67% of the global population used chatbots for customer support in the past year. (Invesp)
-People are most interested in using chatbots to answer simple questions, resolve a problem, make a reservation, or pay a bill.
-BUT …. 43 percent of adult Americans say they prefer to deal with a real-life assistant, rather than a chatbot. (Convince & Convert)
-That last statistic is key.
+Every day the world is becoming increasingly powered by artificial intelligence. In fact, you’d struggle to find tech companies that have not announced AI integrations into their tech stack in one way or another. Cynics might say this is a passing phase, but the reason AI is so popular is that it’s a versatile set of capabilities that can help solve a lot of problems.
+The most direct way AI can be utilized is in the form of a chatbot: a conversational interface that mimics human interaction, generating contextual responses based on what the user inputs. Sometimes these are text-based, such as the customer service bots you often see on websites or apps. And sometimes they’re voice-enabled, like Siri, Google Assistant, and Alexa. These specific examples only just scratch the surface of what chatbots can do. As the technology continues to evolve and improve, the importance of chatbots will grow across various industries. 
+In this article, we’re not just going to walk you through the steps of building your first chatbot. We’ll also go through the dos and don’ts for chatbot developers, which will help you create a chatbot the right way. The article will also cover:
+Understanding chatbots in the AI landscape
+The essential components of a chatbot
+Building your first chatbot: A step-by-step guide
+Using LLMs for your chatbot
+Testing and deploying your chatbot
 
-People like the quick response time and 24/7 access to chatbots, but at the end of the day, they want a human making the final sale.
+By the end of this article, you’ll know how to create a chatbot that will stay up to date and provide the most value, while respecting the safety of your users.
+Understanding chatbots in the AI landscape
+In simple terms, a chatbot is an interface for communicating with software via a simulated conversation. In the past, this was done using rudimentary workflows, but since the availability of AI and machine learning tools has exploded, chatbots are capable of much more. Now, virtual agents use AI and natural language processing (NLP) to understand and process your input, so that responses can be tailored to those inputs. This includes use cases like answering questions, resolving issues, and engaging in casual conversation.
+This makes chatbots excellent at implementing many key business functions. Let’s see where chatbots are making a difference:
+Customer service: They make it cheaper and easier for companies to provide 24/7 support to their customers.
+Lead generation and qualification: They can interact and engage with site visitors, collect information, and even schedule appointments for sales teams.
+Data collection and analysis: They can gather information from users, analyze feedback, and identify trends to improve products and services.
+Education and training: They can deliver online courses, answer student questions, and provide feedback.
+Accessibility and inclusion: They can provide support for users with disabilities, translate languages, and provide information in multiple formats.
+Content creation and moderations: They can generate written content, moderate online communities, and even filter inappropriate content.
+As these examples show, chatbots bridge the gap between the customer and the technology being used to run the company. Instead of manually gathering data and then having to feed it into an AI system, you’re cutting out the middleman. This means you can identify and solve problems faster, giving your users a better experience.
 
-Below, we teach you everything you need to know about chatbots, including how to get started with scripting your first bot. We’ll also show you how to create your first bot using Hubspot’s Chatflows, a free, intuitive tool that integrates seamlessly with Hubspot CRM.
+Essential components of a chatbot
+The beauty of a chatbot for the end user is the simplicity of the experience. Users can talk to the bot like they would talk to a real person, and they should get a meaningful and helpful reply back.
+But to achieve this simplicity, you need a few key components to work together to interpret the input, learn from the available data sources, and decide what the best response will be.
+The interpreter: Natural language processing (NLP)
+Think of NLP as a translator, there to make sure the chatbot understands what’s being asked of it. This component takes in what the user said or asked and analyzes it for sentiment, context, intent, and more. It achieves this by doing a few things:
+Tokenization: Splits the input into individual words and phrases
+Part-of-speech tagging: Categorizes each word into nouns, verbs, adjectives, etc.
+Syntax analysis: Works out the sentence structure and relationship between words
+Semantic analysis: Deciphers the meaning behind each word, analyzing context and intent
 
-What is a Chatbot?
-A bot is a computer program that automates selected tasks by chatting with a user through a conversational interface.
+The learner: Machine learning (ML)
+An attribute of a successful chatbot is its ability to learn and grow the more it’s interacted with. This is thanks to machine learning, which gives it the power to learn and adapt through several means:
+Supervised learning: The chatbot is trained on labeled data, where it learns to connect inputs with the desired response.
+Unsupervised learning: This is where the chatbot analyzes unlabeled data. So instead of being shown the connections, it looks for patterns and relationships to find the connections itself.
+Reinforcement learning: The chatbot uses trial and error to learn what works best, improving its responses based on the outcomes and user feedback.
 
-How to Get Started with Chatbots  
+The brain: AI algorithms
+In theory, a chatbot doesn’t need to use AI algorithms. But these algorithms are the difference between basic rule-based responses and a free-flowing conversation that properly understands the problems it’s solving for the user. These can vary wildly, but these are some of the more common functions of AI algorithms:
+Dialogue management: These algorithms manage the flow of the conversations: moving between topics, providing relevant information, and helping the conversation flow naturally.
+Response generation: These AI algorithms generate appropriate responses based on context, intent, tone, and other relevant information. 
 
-What To Consider Before You Start Writing 
+Personalization: Personalization algorithms tailor responses to the specific user and their needs. It does this using user data and past interactions.
+Building your first chatbot: A step-by-step guide
 
-Remember your goals
+Step 1: Selecting the right platform and tools
+The first step in building your first chatbot is in deciding what platform you’re going to use. This is the foundation of your chatbot, and the platform you choose will depend on what the goal of your chatbot is. Here are a few questions you should ask yourself:
+What problem are you trying to solve?
+How complex is that problem?
+Who is the target audience for your chatbot?
+What features and functionality do you need?
+Another important consideration is the available budget and skill sets. There’s a vast difference between a hobbyist with minimal technical skills and a fully fledged dev team backed by a large budget. That’s why it’s useful to consider the different types of chatbot platforms:
+No-code/low-code: Easy to use, with templates, drag-and-drop interfaces, etc. Perfect for those with limited coding experience. Examples: Chatfuel, ManyChat, and Landbot.
+Code-based platforms: Require coding skills, but allow more flexibility, control, and customization. Examples: Rasa, Microsoft Bot Framework, Dialogflow.
+Enterprise-level: Designed for large-scale deployment and include advanced features and integrations out of the box. Examples: IBM Watson Assistant, Amazon Lex, Nuance. 
+For example, if you want to quickly build a Facebook Messenger chatbot with relatively simple functionality, something like ManyChat would be perfect. But if you want to build a more powerful chatbot that runs from an API and can be heavily customized, a platform like Rasa would be a better option for you.
 
-Be clear on the context
+Step 2: Designing conversational flows
+When you’re building a chatbot, conversational flows dictate the structure and progression of conversations between the user and the chatbot. Think of the conversational flows as the conductor, directing the different musicians to ensure it all flows together smoothly. You do this using five key elements:
+Intents: Identify the goals and motivations from a user’s input.
+Entities: Categorize key information like names, locations, and dates.
+Dialog states: Track the conversation so far to avoid repetition and guide responses.
+Branches and transitions: Map different paths depending on the user’s responses.
+Responses: Generate contextual and useful responses to send back to the user.
+To design effective flows, you need to start with the key problem you’re solving and then map out potential conversation paths. How you implement this will depend on the platform you choose, but flowcharts are useful at the design stage to represent the conversation structure. 
+When you’re first building your chatbot, keep the flows as simple as possible and avoid complex branching with excessive options. This way you can start testing and iterating sooner and can focus on the areas that need the most improvement.
 
-Stay consistent 
+Step 3: Integrating NLP and machine learning
+The integration of NLP and machine learning is the difference between a truly intelligent chatbot that can learn and have natural conversations with users and one that’s just a basic script reader.
+In addition to performing intent recognition and entity extraction, NLP libraries like spaCy and NLTK (Natural Language Toolkit) help with key tasks like sentiment analysis. This analyzes the tone of the users' messages and identifies emotion, which means your chatbot can match the tone and respond with empathy.
+Similarly, an integration with powerful ML libraries like TensorFlow or PyTorch gives your chatbot the ability to learn and evolve based on past interactions and user data. This not only allows your chatbot to generate more personalized and useful responses, but it can also make predictions from this data and proactively offer assistance and suggestions before the user has to ask.
 
-Be concise
+Dos and don'ts for chatbot developers
+Do: Embrace AI and machine learning
+By integrating AI and machine learning algorithms, you’ll enhance the chatbot’s understanding and response accuracy. These technologies are the reason a great chatbot adapts, learns, and improves over time. As a chatbot developer, you should seek out AI and machine learning libraries that add genuine value for your users.
+Do: Focus on data-driven insights
+To create a truly useful chatbot, continuously look for ways to improve your bot’s performance and response quality. The best way to do this is by capturing and analyzing user interaction data and then identifying where you can refine and iterate your conversation flows and functionality.
+Do: Stay updated with AI trends
+As the last few years have shown, the AI space is growing fast. It feels like every day there’s a new game-changing library, app, or API being launched. These advancements can feel daunting, but if you keep on top of these new trends and technologies, you could find the missing ingredient to take your chatbot to the next level. 
+Do: Think about the scope of your chatbot’s responses
+There are plenty of examples of GPT-based chatbots being asked a broad range of questions (for example, users asking financial advice questions to a chatbot built to handle travel questions). Very early in your design, consider creating a finite scope of questions and topics you’d allow your chatbot to respond to for a great user experience early on. 
+Don’t: Put user safety and bias second
+It’s easy to get carried away with the endless possibilities for your chatbot, but it’s also important to be careful. Biases can creep into your chatbots, which can negatively impact its responses. You also need to respect user privacy and ethical standards, both to protect your users and to avoid getting yourself in trouble.
+Don’t: Ignore the importance of testing
+We’ll cover this in a bit more detail shortly, but don’t fall into the trap of deploying your chatbot without rigorous testing with real-world scenarios. You need to have confidence that it’s robust and reliable before an end user gets anywhere near your chatbot.
+Don’t: Overlook user feedback
+To create the best chatbot you can, you need to regularly collect and act on feedback from your users. This feedback will be vital if you want your chatbot to stay relevant and be successful in the long run. This could be bug reports, complaints, or even feature requests. Take all of this feedback seriously and keep looking for ways to improve users’ experience.
 
-Vary responses
+Using LLMs for your chatbot (RAG, fine-tuning)
+Another powerful way to improve the abilities and performance of your chatbot is by connecting it to a large language model (LLM). An LLM is a powerful type of AI trained on huge amounts of data to comprehend and generate human language responses.
+Despite their impressive power, an LLM like GPT-4 or LLaMA is unlikely to align with the specific needs of your chatbot out of the box. In order to harness the power of the LLM, you’ll need to customize and enhance it so it can understand and respond consistently with your chatbot's intended use.
+One way to do this is with retrieval augmented generation (RAG). This is where a retrieval model is used to curate relevant documents based on the user's query, which are then passed to the LLM. These documents could come from your private data, such as a pre-existing knowledge base, chat logs, or any other relevant content. The LLM can then combine this information with its existing capabilities to generate a response that’s more accurate, relevant, and efficient.
+Another way to improve its integration with the chatbot is by fine-tuning the LLM. This is where you essentially tailor the LLM toward the specific task or problem your chatbot is designed to solve. This enables it to learn domain-specific language and improves the relevance of the responses it generates. This process can also be repeated as your chatbot evolves or more data becomes available, so the LLM is always optimized to work with your bot.
 
-Finish strong
+Testing your chatbot
+Like with any sort of software development, testing is a key part of building and improving your chatbot. To be confident your chatbot is ready for deployment, you need to test the functionality, the user experience, and the error handling. 
+Functional testing
+To ensure your chatbot functions as you expect, perform functional testing at the unit and integration levels, as well as through wider system testing. You should also evaluate the chatbot’s performance, making sure there are no bottlenecks or scalability issues.
+User experience testing
+Think about the end user to make sure you give them the best possible experience. Usability testing is a great way to do this, where you observe real users interacting with your chatbot. To ensure your chatbot can be used by everyone, carry out accessibility testing, which includes testing with a screen reader and using the bot with just a keyboard.
+Error handling
+Before you deploy your chatbot, you need to know it can gracefully handle any errors that might occur. This can include stress testing to simulate high traffic, submitting unexpected inputs, and checking for security vulnerabilities. You want to make sure that if something goes wrong, the whole thing doesn’t explode.
 
-Sound natural
+Deploying your chatbot
+When you’re confident that your chatbot is ready, it’s time to deploy. But before you hit the big green button, there are a few things you should consider:
+Monitoring and analytics: Make sure you have systems in place to continuously monitor performance, user activity, and other key metrics, which will help you catch problems fast and make future improvements.
+Feedback channels: Make it as easy as possible for users to send feedback after you’ve deployed. They’ll feel better because they have someone to reach out to, and you’ll feel better because you know what they’re thinking.
+Phased rollout: Deploying a new app can be risky, so consider doing a phased deployment to test the water before you do a full launch. By launching to a smaller audience first, you can analyze the interactions and make any necessary tweaks.
 
-Pace it out 
+Endless chatbot opportunities
+The world of chatbots and AI is constantly evolving, changing how we interact with technology and businesses. Hopefully, this article has demystified the tech and given you the confidence to build your own chatbot. By embracing the endless potential of chatbots, you can create your own unique AI application that can grow and evolve as you learn and refine your own skills. 
+We’re doing the same here at Elastic® — always looking at ways to use these advancements to improve our products and make our customers' lives easier, from enhancing the chatbot capabilities in Elasticsearch® to our recent acquisition of Opster, which built its own brilliant chatbot OpsGPT.
+The AI revolution is certainly in full swing, and it’s guaranteed to be an exciting journey!
 
-Highly advanced bots are powered by artificial intelligence, constantly learning from user requests and improving its knowledge base with each interaction.
-
-However, the majority of bots in use today follow a simple phone-tree like simulation: A+B = C, based on if/then logic, or by offering selections from which to choose.
-
-chatbot example if/then logic
-
-Does your brand need a chatbot?
-Hmm, good question. Do you have a simple task or a common inquiry you get asked repeatedly on your website? If the answer is yes, then you need a chatbot. An easy to write, easy to install chatbot could save you valuable time and money by helping you with a repetitive, time-draining task.
-
-Beyond managing simple, repetitive requests, you can also build in logic that can help you acquire quality leads and pass them directly to a salesperson in live chat, to close the deal.
-
-So the real question is, why DON’T you need a chatbot?
-
-How to Get Started with Chatbots
-First, you’ll need to select a chatbot platform. With so many third-party plugins, you have a plethora of options to help you get started, here are a few we’re familiar with:
-
-Hubspot free CRM and Chatbot builder
-Drift
-Chatfuel
-Pandorabots
-AgentBot
-ManyChat
-In addition to the platform you’ll use to implement your bot, you’ll need a method to write, edit and share your bot scripts before implementation. Here are a few programs to consider:
-
-Microsoft Excel
-Lucidchart 
-Draw.IO
-Google Drawings
-Google Sheets
-ArcTouch
-flow-chart
-
-Did you ever read a pick your own adventure book when you were younger? If so, you can build a chatbot inside HubSpot Conversations. As a non-technical marketer, it's so easy to build useful chatbots that leverage data in my CRM.
--Connor Cirillo, Hubspot
-
-What is a Chatbot Script?
-A chatbot script is an original document which outlines sequences of conversational messages based on user intention and selections.
-
-What To Consider Before You Start Writing
-The script writing process starts with an understanding of the business process.
-
-Where is additional support required?
-What questions can a bot or artificial intelligence answer to support user experience?
-How can a bot filter MQLs towards SQLs?
-Chatbot execution starts with:
-
-Finding the logical question and answer needs within the buyer journey.
-Crafting the narrative first.
-Building the bot second.
-Crafting the narrative first is perhaps the most important chatbot consideration. Trying to fiddle in your bot platform adding and editing questions will just lead to frustration. Write the script for your buyer journey, leading MQLs to SQLs, and build the bot sequences second.
+What you should do next
+Whenever you're ready, here are four ways we can help you harness insights from your business’ data:
+Start a free trial and see how Elastic can help your business.
+Tour our solutions to see how Elastic's Search AI Platform works and how our solutions will fit your needs.
+Discover how to deliver generative AI in the enterprise.
+Share this article with someone you know who'd enjoy reading it via email, LinkedIn, Twitter, or Facebook.
