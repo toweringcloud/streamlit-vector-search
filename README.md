@@ -49,6 +49,15 @@ $ exit
 
 ### launch
 
+-   update application secrets in streamlit env
+
+```sh
+$ vi .streamlit/secrets.toml
+OPENSEARCH_HOST = "localhost"
+OPENSEARCH_PORT = 9200
+...
+```
+
 -   run streamlit app in root environment
 
 ```sh

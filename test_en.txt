@@ -1,0 +1,88 @@
+https://www.streamcreative.com/chatbot-scripts-examples-templates
+
+Chatbot Scripts: A Step By Step Guide (With Examples & Templates)
+Chatbots aren’t going anywhere. In fact, if you haven’t had an encounter with a chatbot in your own online user experience, you’re in the minority.
+
+The use of chatbots as a brand communication channel has increased by 92% since 2019. (Drift)
+At least 67% of the global population used chatbots for customer support in the past year. (Invesp)
+People are most interested in using chatbots to answer simple questions, resolve a problem, make a reservation, or pay a bill.
+BUT …. 43 percent of adult Americans say they prefer to deal with a real-life assistant, rather than a chatbot. (Convince & Convert)
+That last statistic is key.
+
+People like the quick response time and 24/7 access to chatbots, but at the end of the day, they want a human making the final sale.
+
+Below, we teach you everything you need to know about chatbots, including how to get started with scripting your first bot. We’ll also show you how to create your first bot using Hubspot’s Chatflows, a free, intuitive tool that integrates seamlessly with Hubspot CRM.
+
+What is a Chatbot?
+A bot is a computer program that automates selected tasks by chatting with a user through a conversational interface.
+
+How to Get Started with Chatbots  
+
+What To Consider Before You Start Writing 
+
+Remember your goals
+
+Be clear on the context
+
+Stay consistent 
+
+Be concise
+
+Vary responses
+
+Finish strong
+
+Sound natural
+
+Pace it out 
+
+Highly advanced bots are powered by artificial intelligence, constantly learning from user requests and improving its knowledge base with each interaction.
+
+However, the majority of bots in use today follow a simple phone-tree like simulation: A+B = C, based on if/then logic, or by offering selections from which to choose.
+
+chatbot example if/then logic
+
+Does your brand need a chatbot?
+Hmm, good question. Do you have a simple task or a common inquiry you get asked repeatedly on your website? If the answer is yes, then you need a chatbot. An easy to write, easy to install chatbot could save you valuable time and money by helping you with a repetitive, time-draining task.
+
+Beyond managing simple, repetitive requests, you can also build in logic that can help you acquire quality leads and pass them directly to a salesperson in live chat, to close the deal.
+
+So the real question is, why DON’T you need a chatbot?
+
+How to Get Started with Chatbots
+First, you’ll need to select a chatbot platform. With so many third-party plugins, you have a plethora of options to help you get started, here are a few we’re familiar with:
+
+Hubspot free CRM and Chatbot builder
+Drift
+Chatfuel
+Pandorabots
+AgentBot
+ManyChat
+In addition to the platform you’ll use to implement your bot, you’ll need a method to write, edit and share your bot scripts before implementation. Here are a few programs to consider:
+
+Microsoft Excel
+Lucidchart 
+Draw.IO
+Google Drawings
+Google Sheets
+ArcTouch
+flow-chart
+
+Did you ever read a pick your own adventure book when you were younger? If so, you can build a chatbot inside HubSpot Conversations. As a non-technical marketer, it's so easy to build useful chatbots that leverage data in my CRM.
+-Connor Cirillo, Hubspot
+
+What is a Chatbot Script?
+A chatbot script is an original document which outlines sequences of conversational messages based on user intention and selections.
+
+What To Consider Before You Start Writing
+The script writing process starts with an understanding of the business process.
+
+Where is additional support required?
+What questions can a bot or artificial intelligence answer to support user experience?
+How can a bot filter MQLs towards SQLs?
+Chatbot execution starts with:
+
+Finding the logical question and answer needs within the buyer journey.
+Crafting the narrative first.
+Building the bot second.
+Crafting the narrative first is perhaps the most important chatbot consideration. Trying to fiddle in your bot platform adding and editing questions will just lead to frustration. Write the script for your buyer journey, leading MQLs to SQLs, and build the bot sequences second.
