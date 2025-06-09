@@ -24,37 +24,38 @@ st.set_page_config(
 st.title("Vector Search 😎")
 
 st.markdown(
-    """         
+    """
         Use this chatbot to ask questions about your document.
 
-        1. Input your OpenAI API Key on the sidebar.
-        2. Choose an AI model (gpt-4o-mini, ...).
-        3. Upload a document file (txt | doc | pdf).
-        4. Ask questions related to the document.
+        1. Choose a vector storage.
+        2. Choose a favorite model.
+        3. Input your OpenAI API key.
+        4. Upload a text document file.
+        5. Ask questions about your document.
     """
 )
 st.divider()
 
 with st.sidebar:
-    # Input LLM API Key
-    openai_api_key = st.text_input("Input your OpenAI API Key", type="password")
-
-    # Select AI Model
-    selected_model = st.selectbox(
-        "Choose your AI Model",
-        ("gpt-4.1-nano", "gpt-4o-mini"),
-    )
-
-    # Select Vector Storage
+    # Vector Storage
     selected_storage = st.selectbox(
-        "Choose your Vector Storage",
+        "Choose a vector storage",
         ("LocalFileStore", "OpenSearch", "Elasticsearch"),
     )
 
-    # Upload Document File
+    # GPT Model
+    selected_model = st.selectbox(
+        "Choose a favorite Model",
+        ("gpt-4.1-nano", "gpt-4o-mini"),
+    )
+
+    # LLM API Key
+    openai_api_key = st.text_input("Input your OpenAI API key", type="password")
+
+    # Document File
     file = st.file_uploader(
-        "Upload a text file",
-        # type=["docx", "pdf", "txt"],
+        "Upload a text document file",
+        help="Upload a text document file to embed and search. Currently supports txt files only.",
         type=["txt"],
     )
 
