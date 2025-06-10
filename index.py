@@ -11,6 +11,7 @@ from langchain_community.vectorstores import OpenSearchVectorSearch
 from langchain_elasticsearch import ElasticsearchStore
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
+from langchain_postgres import PGVector
 from langchain_unstructured import UnstructuredLoader
 from opensearchpy import OpenSearch
 from pathlib import Path
@@ -26,12 +27,13 @@ st.markdown(
     """
         Use this chatbot to ask questions about your document.
 
-        1. Choose a vector storage for search.
-        2. Choose a large language model.
-        3. Choose a specific version.
-        4. Input your custom API key.
-        5. Upload a text document file.
-        6. Ask questions about your document.
+        1. Choose an embedding vector storage.
+        2. Choose an embedding cache storage.
+        3. Choose a large language model.
+        4. Choose a specific model version.
+        5. Input your custom API key.
+        6. Upload a text document file.
+        7. Ask questions about your document.
     """
 )
 st.divider()
@@ -40,8 +42,8 @@ with st.sidebar:
     # Vector Storage
     selected_vector = st.selectbox(
         "Choose an embedding vector storage",
-        # ("FAISS", "Cloudflare-Vectorize", "PostgreSQL", "Superbase", "OpenSearch", "Elasticsearch"),
-        ("FAISS", "OpenSearch", "Elasticsearch"),
+        # ("FAISS", "Vectorize", "PostgreSQL", "Superbase", "OpenSearch", "Elasticsearch"),
+        ("FAISS", "PostgreSQL", "OpenSearch", "Elasticsearch"),
     )
 
     # Cache Storage
@@ -60,7 +62,7 @@ with st.sidebar:
 
     # GPT Version
     selected_version = st.selectbox(
-        "Choose a specific version",
+        "Choose a specific model version",
         (
             ("gpt-4.1-nano", "gpt-4o-mini")
             if selected_model == "OpenAI"
@@ -104,12 +106,6 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 # Load Configuration
 if "OPENSEARCH_HOST" in st.secrets:
-    OPENSEARCH_HOST = st.secrets["OPENSEARCH_HOST"]
-    OPENSEARCH_PORT = st.secrets["OPENSEARCH_PORT"]
-    OPENSEARCH_USERNAME = st.secrets["OPENSEARCH_USERNAME"]
-    OPENSEARCH_PASSWORD = st.secrets["OPENSEARCH_PASSWORD"]
-    OPENSEARCH_INDEX_NAME = st.secrets["OPENSEARCH_INDEX_NAME"]
-    OPENSEARCH_CACHE_INDEX_NAME = st.secrets["OPENSEARCH_CACHE_INDEX_NAME"]
     ELASTICSEARCH_SCHEME = st.secrets["ELASTICSEARCH_SCHEME"]
     ELASTICSEARCH_HOST = st.secrets["ELASTICSEARCH_HOST"]
     ELASTICSEARCH_PORT = st.secrets["ELASTICSEARCH_PORT"]
@@ -117,14 +113,16 @@ if "OPENSEARCH_HOST" in st.secrets:
     ELASTICSEARCH_PASSWORD = st.secrets["ELASTICSEARCH_PASSWORD"]
     ELASTICSEARCH_INDEX_NAME = st.secrets["ELASTICSEARCH_INDEX_NAME"]
     ELASTICSEARCH_CACHE_INDEX_NAME = st.secrets["ELASTICSEARCH_CACHE_INDEX_NAME"]
+    OPENSEARCH_HOST = st.secrets["OPENSEARCH_HOST"]
+    OPENSEARCH_PORT = st.secrets["OPENSEARCH_PORT"]
+    OPENSEARCH_USERNAME = st.secrets["OPENSEARCH_USERNAME"]
+    OPENSEARCH_PASSWORD = st.secrets["OPENSEARCH_PASSWORD"]
+    OPENSEARCH_INDEX_NAME = st.secrets["OPENSEARCH_INDEX_NAME"]
+    OPENSEARCH_CACHE_INDEX_NAME = st.secrets["OPENSEARCH_CACHE_INDEX_NAME"]
+    POSTGRES_CONNECTION_STRING = st.secrets["POSTGRES_CONNECTION_STRING"]
+    POSTGRES_COLLECTION_NAME = st.secrets["POSTGRES_COLLECTION_NAME"]
 else:
     config = dotenv_values(".env")
-    OPENSEARCH_HOST = config["OPENSEARCH_HOST"]
-    OPENSEARCH_PORT = config["OPENSEARCH_PORT"]
-    OPENSEARCH_USERNAME = config["OPENSEARCH_USERNAME"]
-    OPENSEARCH_PASSWORD = config["OPENSEARCH_PASSWORD"]
-    OPENSEARCH_INDEX_NAME = config["OPENSEARCH_INDEX_NAME"]
-    OPENSEARCH_CACHE_INDEX_NAME = config["OPENSEARCH_CACHE_INDEX_NAME"]
     ELASTICSEARCH_SCHEME = config["ELASTICSEARCH_SCHEME"]
     ELASTICSEARCH_HOST = config["ELASTICSEARCH_HOST"]
     ELASTICSEARCH_PORT = config["ELASTICSEARCH_PORT"]
@@ -132,13 +130,20 @@ else:
     ELASTICSEARCH_PASSWORD = config["ELASTICSEARCH_PASSWORD"]
     ELASTICSEARCH_INDEX_NAME = config["ELASTICSEARCH_INDEX_NAME"]
     ELASTICSEARCH_CACHE_INDEX_NAME = config["ELASTICSEARCH_CACHE_INDEX_NAME"]
+    OPENSEARCH_HOST = config["OPENSEARCH_HOST"]
+    OPENSEARCH_PORT = config["OPENSEARCH_PORT"]
+    OPENSEARCH_USERNAME = config["OPENSEARCH_USERNAME"]
+    OPENSEARCH_PASSWORD = config["OPENSEARCH_PASSWORD"]
+    OPENSEARCH_INDEX_NAME = config["OPENSEARCH_INDEX_NAME"]
+    OPENSEARCH_CACHE_INDEX_NAME = config["OPENSEARCH_CACHE_INDEX_NAME"]
+    POSTGRES_CONNECTION_STRING = config["POSTGRES_CONNECTION_STRING"]
+    POSTGRES_COLLECTION_NAME = config["POSTGRES_COLLECTION_NAME"]
 
 # Initiate Session Data
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 
-# OpenSearch 클라이언트 초기화 함수
 @st.cache_resource
 def get_opensearch_client():
     try:
@@ -153,7 +158,7 @@ def get_opensearch_client():
         print(f"[opensearch] {client.info()}")
         return client
     except Exception as e:
-        st.error(f"OpenSearch 클라이언트 초기화 중 오류 발생: {e}")
+        st.error(f"OpenSearch 클라이언트 초기화 오류: {e}")
         st.stop()
 
 
@@ -206,6 +211,16 @@ def embed_file(file):
         # INFO: Loading faiss with AVX2 support.
         # INFO: Successfully loaded faiss with AVX2 support.
         # INFO: Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes. This is only an error if you're trying to use GPU Faiss.
+
+    elif selected_vector == "PostgreSQL":
+        vectorstore = PGVector.from_documents(
+            documents=docs,
+            embedding=cached_embeddings,
+            connection=POSTGRES_CONNECTION_STRING,
+            collection_name=POSTGRES_COLLECTION_NAME,
+        )
+        # 2025-06-10 07:31:36.801 UTC [60] LOG:  checkpoint starting: time
+        # 2025-06-10 07:31:48.480 UTC [60] LOG:  checkpoint complete: wrote 117 buffers (0.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=11.645 s, sync=0.021 s, total=11.679 s; sync files=63, longest=0.012 s, average=0.001 s; distance=560 kB, estimate=3866 kB
 
     elif selected_vector == "OpenSearch":
         vectorstore = OpenSearchVectorSearch.from_documents(
@@ -329,22 +344,30 @@ try:
     # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
     # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 
-    # Cloudflare-Vectorize
+    # Vectorize (Cloudflare)
+    # Not Implemented Yet
 
     # PostgreSQL
+    # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+    # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
     # Superbase
+    # Not Implemented Yet
 
     # OpenSearch
     # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
     # INFO: POST https://localhost:9200/streamlit_documents/_search [status:200 request:0.102s]
     # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 
-    # Elasticsearch
+    # Elasticsearch (Trial)
     # INFO: GET http://localhost:19200/ [status:200 duration:0.016s]
     # [elasticsearch] {'name': '8a78141836b8', 'cluster_name': 'docker-cluster', 'cluster_uuid': 'tLCmQr9YTi-20hLLeEyJuw', 'version': {'number': '8.13.4', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': 'da95df118650b55a500dcc181889ac35c6d8da7c', 'build_date': '2024-05-06T22:04:45.107454559Z', 'build_snapshot': False, 'lucene_version': '9.10.0', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}
     # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
     # INFO: POST http://localhost:19200/streamlit_documents/_search?_source_includes=metadata,text [status:200 duration:0.129s]
     # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
+    # MongoDB (Community)
+    # Not Implemented Yet
 
 except Exception as e:
     st.error("Check your OpenAI API Key or File")

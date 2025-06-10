@@ -1,5 +1,5 @@
 # streamlit-vector-search
-rag based vector search using postgresql, opensearch and elasticsearch with python v3.12.8 + streamlit v1.45.1 + langchain v0.3.25
+embedding vector search using faiss, postgresql and opensearch with python v3.12.8 + streamlit v1.45.1 + langchain v0.3.25
 
 ## how to run
 
@@ -20,6 +20,11 @@ Docker version 28.1.1, build 4eba377
 
 $ docker-compose -v
 Docker Compose version v2.35.1-desktop.1
+
+$ ./docker-postgres-pgvector.sh
+$ docker exec -it pgvector-db psql -U postgres
+(SQL) CREATE DATABASE streamlit_documents;
+(SQL) CREATE EXTENSION IF NOT EXISTS vector;
 
 $ docker compose up -d -f docker-compose-opensearch.yml
 $ curl -k -u admin:admin https://localhost:9200
