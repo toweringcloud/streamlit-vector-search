@@ -1,6 +1,5 @@
 import streamlit as st
 from dotenv import dotenv_values
-from elasticsearch import Elasticsearch
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain.prompts import ChatPromptTemplate
@@ -8,8 +7,8 @@ from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.storage import LocalFileStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.vectorstores import ElasticsearchStore
 from langchain_community.vectorstores import OpenSearchVectorSearch
+from langchain_elasticsearch import ElasticsearchStore
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain_unstructured import UnstructuredLoader
@@ -142,36 +141,14 @@ def get_opensearch_client():
             ssl_assert_hostname=False,
             ssl_show_warn=False,
         )
-        # 클라이언트가 제대로 연결되었는지 확인
-        client.info()
+        print(f"[opensearch] {client.info()}")
         return client
     except Exception as e:
         st.error(f"OpenSearch 클라이언트 초기화 중 오류 발생: {e}")
         st.stop()
 
 
-# Elasticsearch 클라이언트 초기화 함수
-@st.cache_resource
-def get_elasticsearch_client():
-    try:
-        client = Elasticsearch(
-            hosts=[
-                {
-                    "scheme": ELASTICSEARCH_SCHEME,
-                    "host": ELASTICSEARCH_HOST,
-                    "port": ELASTICSEARCH_PORT,
-                }
-            ],
-            # http_auth=(ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD),
-        )
-        client.info()
-        return client
-    except Exception as e:
-        st.error(f"Elasticsearch 클라이언트 초기화 중 오류 발생: {e}")
-        st.stop()
-
-
-@st.cache_resource(show_spinner=f"Embedding file and storing in {selected_storage}...")
+# @st.cache_resource(show_spinner=f"Embedding file and storing in {selected_storage}...")
 def embed_file(file):
     # 1. 파일 내용 로컬에 저장
     # 주의: .files 폴더는 Streamlit 앱 재시작 시 사라질 수 있으므로,
@@ -199,9 +176,9 @@ def embed_file(file):
         cache_path = "./.cache"
         embedding_path = f"{cache_path}/local"
         Path(embedding_path).mkdir(parents=True, exist_ok=True)
-        embedding_cache_dir = LocalFileStore(embedding_path)
+        embedding_cache_store = LocalFileStore(embedding_path)
         cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
-            embeddings, embedding_cache_dir
+            embeddings, embedding_cache_store
         )
     elif selected_storage == "OpenSearch":
         # 1) OpenSearch 자체를 Key-Value 스토어로 활용하는 커스텀 ByteStore 구현
@@ -210,17 +187,18 @@ def embed_file(file):
         cache_path = "./.cache"
         embedding_path = f"{cache_path}/open"
         Path(embedding_path).mkdir(parents=True, exist_ok=True)
-        embedding_cache_dir = LocalFileStore(embedding_path)
+        embedding_cache_store = LocalFileStore(embedding_path)
         cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
-            embeddings, embedding_cache_dir
+            embeddings, embedding_cache_store
         )
     elif selected_storage == "Elasticsearch":
-        client = get_elasticsearch_client()
-        embedding_cache_store = ElasticsearchStore(
-            client=client,  # Elasticsearch 클라이언트
-            es_url=f"http://{ELASTICSEARCH_HOST}:{ELASTICSEARCH_PORT}",
-            index_name=ELASTICSEARCH_CACHE_INDEX_NAME,  # 임베딩 캐시 전용 인덱스
-        )
+        # 1) OpenSearch 자체를 Key-Value 스토어로 활용하는 커스텀 ByteStore 구현
+        # 2) Redis와 같은 Key-Value 스토어를 사용하여 임베딩 캐시를 저장
+        # 3) 로컬 파일 시스템을 사용하여 임베딩 캐시를 저장
+        cache_path = "./.cache"
+        embedding_path = f"{cache_path}/elastic"
+        Path(embedding_path).mkdir(parents=True, exist_ok=True)
+        embedding_cache_store = LocalFileStore(embedding_path)
         cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
             embeddings, embedding_cache_store
         )
@@ -234,6 +212,10 @@ def embed_file(file):
             docs,
             cached_embeddings,
         )
+        # INFO: Loading faiss with AVX2 support.
+        # INFO: Successfully loaded faiss with AVX2 support.
+        # INFO: Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes. This is only an error if you're trying to use GPU Faiss.
+
     elif selected_storage == "OpenSearch":
         vectorstore = OpenSearchVectorSearch.from_documents(
             docs,
@@ -247,6 +229,10 @@ def embed_file(file):
             ssl_show_warn=False,
             # bulk_size=1000 # 대량 인덱싱 시 최적화 옵션 (선택 사항)
         )
+        # INFO: GET https://localhost:9200/streamlit_documents [status:200 request:0.051s]
+        # INFO: POST https://localhost:9200/_bulk [status:200 request:0.193s]
+        # INFO: POST https://localhost:9200/streamlit_documents/_refresh [status:200 request:0.086s]
+
     elif selected_storage == "Elasticsearch":
         vectorstore = ElasticsearchStore.from_documents(
             docs,
@@ -254,6 +240,14 @@ def embed_file(file):
             es_url=f"http://{ELASTICSEARCH_HOST}:{ELASTICSEARCH_PORT}",
             index_name=ELASTICSEARCH_INDEX_NAME,
         )
+        # INFO: GET http://localhost:19200/ [status:200 duration:0.007s]
+        # INFO: HEAD http://localhost:19200/streamlit_documents [status:200 duration:0.015s]
+        # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+        # INFO: PUT http://localhost:19200/_bulk?refresh=true [status:200 duration:0.571s]
+
+    else:
+        st.error("Invalid storage option selected.")
+        st.stop()
 
     # 6. Retriever 생성
     retriever = vectorstore.as_retriever()
@@ -333,11 +327,28 @@ def main():
 
     else:
         st.session_state["messages"] = []
+        paint_history()
         return
 
 
 try:
     main()
+
+    # LocalFileStore
+    # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+    # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
+    # OpenSearch
+    # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+    # INFO: POST https://localhost:9200/streamlit_documents/_search [status:200 request:0.102s]
+    # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
+    # Elasticsearch
+    # INFO: GET http://localhost:19200/ [status:200 duration:0.016s]
+    # [elasticsearch] {'name': '8a78141836b8', 'cluster_name': 'docker-cluster', 'cluster_uuid': 'tLCmQr9YTi-20hLLeEyJuw', 'version': {'number': '8.13.4', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': 'da95df118650b55a500dcc181889ac35c6d8da7c', 'build_date': '2024-05-06T22:04:45.107454559Z', 'build_snapshot': False, 'lucene_version': '9.10.0', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}
+    # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+    # INFO: POST http://localhost:19200/streamlit_documents/_search?_source_includes=metadata,text [status:200 duration:0.129s]
+    # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 
 except Exception as e:
     st.error("Check your OpenAI API Key or File")
