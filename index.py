@@ -38,14 +38,23 @@ st.divider()
 
 with st.sidebar:
     # Vector Storage
-    selected_storage = st.selectbox(
-        "Choose a vector storage for search",
-        ("LocalFileStore", "OpenSearch", "Elasticsearch"),
+    selected_vector = st.selectbox(
+        "Choose an embedding vector storage",
+        # ("FAISS", "Cloudflare-Vectorize", "PostgreSQL", "Superbase", "OpenSearch", "Elasticsearch"),
+        ("FAISS", "OpenSearch", "Elasticsearch"),
+    )
+
+    # Cache Storage
+    selected_cache = st.selectbox(
+        "Choose an embedding cache storage",
+        # ("LocalFileStore", "Redis", "Cloudflare-KV"),
+        ("LocalFileStore"),
     )
 
     # AI Model
     selected_model = st.selectbox(
         "Choose a large language model",
+        # ("OpenAI", "Claude", "Gemini"),
         ("OpenAI"),
     )
 
@@ -172,42 +181,24 @@ def embed_file(file):
     embeddings = OpenAIEmbeddings(openai_api_key=custom_api_key)
 
     # 4. 임베딩 캐시(ByteStore) 설정
-    if selected_storage == "LocalFileStore":
+    if selected_cache == "LocalFileStore":
         cache_path = "./.cache"
-        embedding_path = f"{cache_path}/local"
+        embedding_path = f"{cache_path}/{selected_vector.lower()}"
         Path(embedding_path).mkdir(parents=True, exist_ok=True)
         embedding_cache_store = LocalFileStore(embedding_path)
         cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
             embeddings, embedding_cache_store
         )
-    elif selected_storage == "OpenSearch":
-        # 1) OpenSearch 자체를 Key-Value 스토어로 활용하는 커스텀 ByteStore 구현
-        # 2) Redis와 같은 Key-Value 스토어를 사용하여 임베딩 캐시를 저장
-        # 3) 로컬 파일 시스템을 사용하여 임베딩 캐시를 저장
-        cache_path = "./.cache"
-        embedding_path = f"{cache_path}/open"
-        Path(embedding_path).mkdir(parents=True, exist_ok=True)
-        embedding_cache_store = LocalFileStore(embedding_path)
-        cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
-            embeddings, embedding_cache_store
-        )
-    elif selected_storage == "Elasticsearch":
-        # 1) OpenSearch 자체를 Key-Value 스토어로 활용하는 커스텀 ByteStore 구현
-        # 2) Redis와 같은 Key-Value 스토어를 사용하여 임베딩 캐시를 저장
-        # 3) 로컬 파일 시스템을 사용하여 임베딩 캐시를 저장
-        cache_path = "./.cache"
-        embedding_path = f"{cache_path}/elastic"
-        Path(embedding_path).mkdir(parents=True, exist_ok=True)
-        embedding_cache_store = LocalFileStore(embedding_path)
-        cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
-            embeddings, embedding_cache_store
-        )
+    elif selected_vector == "Redis":
+        pass
+    elif selected_vector == "Cloudflare-KV":
+        pass
     else:
         st.error("Invalid storage option selected.")
         st.stop()
 
     # 5. 벡터 저장소 설정
-    if selected_storage == "LocalFileStore":
+    if selected_vector == "FAISS":
         vectorstore = FAISS.from_documents(
             docs,
             cached_embeddings,
@@ -216,7 +207,7 @@ def embed_file(file):
         # INFO: Successfully loaded faiss with AVX2 support.
         # INFO: Failed to load GPU Faiss: name 'GpuIndexIVFFlat' is not defined. Will not load constructor refs for GPU indexes. This is only an error if you're trying to use GPU Faiss.
 
-    elif selected_storage == "OpenSearch":
+    elif selected_vector == "OpenSearch":
         vectorstore = OpenSearchVectorSearch.from_documents(
             docs,
             cached_embeddings,
@@ -233,7 +224,7 @@ def embed_file(file):
         # INFO: POST https://localhost:9200/_bulk [status:200 request:0.193s]
         # INFO: POST https://localhost:9200/streamlit_documents/_refresh [status:200 request:0.086s]
 
-    elif selected_storage == "Elasticsearch":
+    elif selected_vector == "Elasticsearch":
         vectorstore = ElasticsearchStore.from_documents(
             docs,
             cached_embeddings,
@@ -334,9 +325,14 @@ def main():
 try:
     main()
 
-    # LocalFileStore
+    # FAISS
     # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
     # INFO: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+
+    # Cloudflare-Vectorize
+
+    # PostgreSQL
+    # Superbase
 
     # OpenSearch
     # INFO: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
