@@ -13,7 +13,6 @@ from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import PGVector
 from langchain_unstructured import UnstructuredLoader
-from opensearchpy import OpenSearch
 from pathlib import Path
 
 
@@ -32,8 +31,8 @@ st.markdown(
         3. Choose a large language model.
         4. Choose a specific model version.
         5. Input your custom API key.
-        6. Upload a text document file.
-        7. Ask questions about your document.
+        6. Upload your text document file.
+        7. Ask questions about the document content.
     """
 )
 st.divider()
@@ -42,7 +41,6 @@ with st.sidebar:
     # Vector Storage
     selected_vector = st.selectbox(
         "Choose an embedding vector storage",
-        # ("FAISS", "Vectorize", "PostgreSQL", "Superbase", "OpenSearch", "Elasticsearch"),
         ("FAISS", "PostgreSQL", "OpenSearch", "Elasticsearch"),
     )
 
@@ -106,14 +104,12 @@ class ChatCallbackHandler(BaseCallbackHandler):
 
 # Load Configuration
 if "OPENSEARCH_HOST" in st.secrets:
-    ELASTICSEARCH_SCHEME = st.secrets["ELASTICSEARCH_SCHEME"]
-    ELASTICSEARCH_HOST = st.secrets["ELASTICSEARCH_HOST"]
-    ELASTICSEARCH_PORT = st.secrets["ELASTICSEARCH_PORT"]
+    ELASTICSEARCH_CONNECTION_STRING = st.secrets["ELASTICSEARCH_CONNECTION_STRING"]
     ELASTICSEARCH_USERNAME = st.secrets["ELASTICSEARCH_USERNAME"]
     ELASTICSEARCH_PASSWORD = st.secrets["ELASTICSEARCH_PASSWORD"]
     ELASTICSEARCH_INDEX_NAME = st.secrets["ELASTICSEARCH_INDEX_NAME"]
     ELASTICSEARCH_CACHE_INDEX_NAME = st.secrets["ELASTICSEARCH_CACHE_INDEX_NAME"]
-    OPENSEARCH_HOST = st.secrets["OPENSEARCH_HOST"]
+    OPENSEARCH_CONNECTION_STRING = st.secrets["OPENSEARCH_CONNECTION_STRING"]
     OPENSEARCH_PORT = st.secrets["OPENSEARCH_PORT"]
     OPENSEARCH_USERNAME = st.secrets["OPENSEARCH_USERNAME"]
     OPENSEARCH_PASSWORD = st.secrets["OPENSEARCH_PASSWORD"]
@@ -123,15 +119,12 @@ if "OPENSEARCH_HOST" in st.secrets:
     POSTGRES_COLLECTION_NAME = st.secrets["POSTGRES_COLLECTION_NAME"]
 else:
     config = dotenv_values(".env")
-    ELASTICSEARCH_SCHEME = config["ELASTICSEARCH_SCHEME"]
-    ELASTICSEARCH_HOST = config["ELASTICSEARCH_HOST"]
-    ELASTICSEARCH_PORT = config["ELASTICSEARCH_PORT"]
+    ELASTICSEARCH_CONNECTION_STRING = config["ELASTICSEARCH_CONNECTION_STRING"]
     ELASTICSEARCH_USERNAME = config["ELASTICSEARCH_USERNAME"]
     ELASTICSEARCH_PASSWORD = config["ELASTICSEARCH_PASSWORD"]
     ELASTICSEARCH_INDEX_NAME = config["ELASTICSEARCH_INDEX_NAME"]
     ELASTICSEARCH_CACHE_INDEX_NAME = config["ELASTICSEARCH_CACHE_INDEX_NAME"]
-    OPENSEARCH_HOST = config["OPENSEARCH_HOST"]
-    OPENSEARCH_PORT = config["OPENSEARCH_PORT"]
+    OPENSEARCH_CONNECTION_STRING = config["OPENSEARCH_CONNECTION_STRING"]
     OPENSEARCH_USERNAME = config["OPENSEARCH_USERNAME"]
     OPENSEARCH_PASSWORD = config["OPENSEARCH_PASSWORD"]
     OPENSEARCH_INDEX_NAME = config["OPENSEARCH_INDEX_NAME"]
@@ -142,24 +135,6 @@ else:
 # Initiate Session Data
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
-
-
-@st.cache_resource
-def get_opensearch_client():
-    try:
-        client = OpenSearch(
-            hosts=[{"host": OPENSEARCH_HOST, "port": OPENSEARCH_PORT}],
-            http_auth=(OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD),
-            use_ssl=True,  # HTTPS 사용 시 True
-            verify_certs=False,  # 개발/테스트 시 False, 프로덕션에서는 True 및 인증서 설정 필요
-            ssl_assert_hostname=False,
-            ssl_show_warn=False,
-        )
-        print(f"[opensearch] {client.info()}")
-        return client
-    except Exception as e:
-        st.error(f"OpenSearch 클라이언트 초기화 오류: {e}")
-        st.stop()
 
 
 # @st.cache_resource(show_spinner=f"Embedding file and storing in {selected_storage}...")
@@ -226,7 +201,7 @@ def embed_file(file):
         vectorstore = OpenSearchVectorSearch.from_documents(
             docs,
             cached_embeddings,
-            opensearch_url=f"https://{OPENSEARCH_HOST}:{OPENSEARCH_PORT}",
+            opensearch_url=OPENSEARCH_CONNECTION_STRING,
             http_auth=(OPENSEARCH_USERNAME, OPENSEARCH_PASSWORD),  # 인증 정보
             index_name=OPENSEARCH_INDEX_NAME,  # 문서 벡터를 저장할 인덱스
             use_ssl=True,
@@ -243,7 +218,7 @@ def embed_file(file):
         vectorstore = ElasticsearchStore.from_documents(
             docs,
             cached_embeddings,
-            es_url=f"http://{ELASTICSEARCH_HOST}:{ELASTICSEARCH_PORT}",
+            es_url=ELASTICSEARCH_CONNECTION_STRING,
             index_name=ELASTICSEARCH_INDEX_NAME,
         )
         # INFO: GET http://localhost:19200/ [status:200 duration:0.007s]
